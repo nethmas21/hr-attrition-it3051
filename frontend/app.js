@@ -102,10 +102,17 @@ function renderResult(r) {
   $("prediction-text").textContent = r.prediction;
   $("probability-text").textContent = percent(r.probability_of_leaving);
   $("risk-explanation").textContent = r.risk_explanation;
+  $("context-note").textContent =
+    `For comparison, ${percent(r.company_attrition_rate)} of all employees in the data left the company. ` +
+    `Employees are flagged high risk from ${percent(r.decision_threshold)}.`;
 
   const fill = $("meter-fill");
   fill.className = `meter-fill ${level}`;
   fill.style.width = percent(r.probability_of_leaving);
+  $("meter-threshold").style.left = `${r.decision_threshold * 100}%`;
+  const thresholdLabel = $("meter-threshold-label");
+  thresholdLabel.style.left = `${r.decision_threshold * 100}%`;
+  thresholdLabel.textContent = `${percent(r.decision_threshold)} high-risk threshold`;
 
   const warnings = $("warnings");
   warnings.hidden = r.warnings.length === 0;

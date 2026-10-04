@@ -20,7 +20,18 @@
     "DistanceFromHome",
     "LeavesTaken"
   ],
-  "decision_threshold": 0.5,
+  "model_threshold": 0.5,
+  "calibration": {
+    "method": "sigmoid (Platt), fitted on 5-fold out-of-fold training predictions",
+    "slope": 4.811883875065898,
+    "intercept": -2.7842955891439005,
+    "test_brier_before": 0.1769,
+    "test_brier_after": 0.1692,
+    "test_log_loss_before": 0.5497,
+    "test_log_loss_after": 0.5227
+  },
+  "decision_threshold": 0.4065240375660978,
+  "company_attrition_rate": 0.371,
   "training_ranges": {
     "AppraisalRating": {
       "min": 1.0,
@@ -86,11 +97,13 @@
   "risk_groups_on_test_set": {
     "High": {
       "employees": 272,
-      "actually_left_rate": 0.7904
+      "actually_left_rate": 0.7904,
+      "mean_predicted": 0.7998
     },
     "Low": {
       "employees": 728,
-      "actually_left_rate": 0.2143
+      "actually_left_rate": 0.2143,
+      "mean_predicted": 0.2076
     }
   }
 }

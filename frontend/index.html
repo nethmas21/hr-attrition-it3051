@@ -11,7 +11,7 @@
   <header class="site-header">
     <div class="container">
       <h1>Employee Attrition Risk Checker</h1>
-      <p class="tagline">Estimate how likely an employee is to leave, see the main reasons, and get suggested HR actions.</p>
+      <p class="tagline">Check an employee's risk of leaving, see the main reasons, and get suggested HR actions.</p>
     </div>
   </header>
 
@@ -145,11 +145,16 @@
 
         <div class="meter" aria-hidden="true">
           <div class="meter-fill" id="meter-fill"></div>
-          <div class="meter-threshold" title="Decision threshold (50%)"></div>
+          <div class="meter-threshold" id="meter-threshold"></div>
         </div>
-        <div class="meter-scale" aria-hidden="true"><span>0%</span><span>50% threshold</span><span>100%</span></div>
+        <div class="meter-scale" aria-hidden="true">
+          <span>0%</span>
+          <span class="meter-threshold-label" id="meter-threshold-label"></span>
+          <span>100%</span>
+        </div>
 
         <p class="risk-explanation" id="risk-explanation"></p>
+        <p class="muted small context-note" id="context-note"></p>
 
         <div id="warnings" class="alert alert-warning" hidden></div>
 

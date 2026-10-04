@@ -132,9 +132,11 @@ input:focus, select:focus, button:focus-visible { outline: 2px solid var(--focus
 .meter-fill.high { background: var(--high); }
 .meter-fill.low { background: var(--low); }
 .meter-threshold { position: absolute; top: -2px; bottom: -2px; left: 50%; width: 2px; background: var(--text); }
-.meter-scale { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+.meter-scale { position: relative; display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+.meter-threshold-label { position: absolute; transform: translateX(-50%); white-space: nowrap; }
 
 .risk-explanation { font-size: 0.92rem; margin: 12px 0 0; }
+.context-note { margin: 4px 0 0; }
 
 .factors, .actions-list { list-style: none; padding: 0; margin: 6px 0 0; }
 .factors li {

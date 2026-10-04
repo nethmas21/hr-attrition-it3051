@@ -67,7 +67,8 @@ def test_health(client):
 def test_model_info(client):
     info = client.get("/api/model-info").json()
     assert len(info["features"]) == 10
-    assert info["decision_threshold"] == 0.5
+    assert info["model_threshold"] == 0.5
+    assert 0 < info["decision_threshold"] < 0.5   # calibrated equivalent of the 0.5 model threshold
     assert info["test_metrics"]["test_size"] == 1000
 
 
@@ -91,16 +92,29 @@ def test_preprocessing_matches_training_data_for_whole_test_set(test_set):
 
 
 def test_api_predictions_match_model_directly(client, test_set):
-    """The API must return the same probability as calling the saved model on the processed test data."""
+    """The API must return the same score and decision as calling the saved model on the processed test data."""
     features, X_test = test_set
     model = joblib.load(ROOT / "models" / "final_random_forest_model.pkl")
     sample = X_test.sample(40, random_state=42)
     expected = model.predict_proba(sample)[:, 1]
 
-    for (_, row), expected_probability in zip(sample.iterrows(), expected):
+    for (_, row), expected_score in zip(sample.iterrows(), expected):
         result = client.post("/api/predict", json=row_to_input(row)).json()
-        assert result["probability_of_leaving"] == pytest.approx(expected_probability, abs=1e-4)
-        assert result["will_leave"] == (expected_probability >= 0.5)
+        assert result["model_score"] == pytest.approx(expected_score, abs=1e-4)
+        assert result["will_leave"] == (expected_score >= 0.5)
+        # The calibrated percentage gives exactly the same decision as the Stage 7 model
+        assert result["will_leave"] == (result["probability_of_leaving"] >= result["decision_threshold"])
+
+
+def test_calibration_keeps_ranking_and_decisions(client, test_set):
+    """Calibration must not change which employee is riskier, nor any High/Low decision on the test set."""
+    features, X_test = test_set
+    service = client.app.state.model_service
+    raw = service.model.predict_proba(X_test)[:, 1]
+    calibrated = service.calibrate(raw)
+    order = np.argsort(raw)
+    assert np.all(np.diff(calibrated[order]) >= 0)
+    assert np.array_equal(raw >= 0.5, calibrated >= service.metadata["decision_threshold"] - 1e-9)
 
 
 # ------------------------------------------------------------------ prediction content
@@ -108,7 +122,7 @@ def test_high_risk_example(client):
     result = client.post("/api/predict", json=HIGH_RISK).json()
     assert result["risk_level"] == "High"
     assert result["prediction"] == "Likely to leave"
-    assert result["probability_of_leaving"] >= 0.5
+    assert result["probability_of_leaving"] >= result["decision_threshold"]
     drivers = {f["feature"] for f in result["key_factors"] if f["effect"] == "increases risk"}
     assert {"JobSatisfaction", "WorkLifeBalance", "DoesOvertime", "AppraisalRating"} <= drivers
     assert all(f["suggested_action"] for f in result["key_factors"] if f["effect"] == "increases risk")
@@ -118,7 +132,7 @@ def test_low_risk_example(client):
     result = client.post("/api/predict", json=LOW_RISK).json()
     assert result["risk_level"] == "Low"
     assert result["prediction"] == "Likely to stay"
-    assert result["probability_of_leaving"] < 0.5
+    assert result["probability_of_leaving"] < result["decision_threshold"]
 
 
 def test_contributions_explain_the_difference_from_a_typical_employee(client):

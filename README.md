@@ -44,10 +44,15 @@ The backend serves the frontend, so only one command is needed. Stop the server 
 2. The page sends them to `POST /api/predict`. The backend checks them again and rejects invalid or missing values with a clear message for each field.
 3. The backend applies the same preprocessing as notebook 02 (`Yes`/`No` → 1/0, joining date → joining year, columns in the model's order) and runs the saved model.
 4. The response contains:
-   - the probability of leaving and a **High / Low** risk level (decision threshold 0.5)
+   - the **% chance of leaving** (calibrated, see below) and a **High / Low** risk level
+   - the real-world rate for that risk group on the test set (79% of high-risk and 21% of low-risk employees actually left)
    - the **main factors**: how many percentage points each detail adds or removes compared with a typical employee (exact Shapley values)
    - **suggested HR actions** for the factors that increase risk
    - **warnings** if a value is outside the range seen in the training data
+
+**Calibrated percentages:** the final model was trained with `class_weight='balanced'`, which pushes its raw outputs up for leavers. For example, the high-risk group averaged 0.87 while 79% of it actually left. The backend therefore applies **sigmoid (Platt) calibration**, fitted on 5-fold out-of-fold predictions on the training data only (`backend/scripts/build_model_metadata.py`). On the untouched test set, the calibrated values match reality: the high-risk group averages 80% (79% actually left), and the low-risk group 21% (21% left). Brier score improves from 0.177 to 0.169. Calibration is monotonic, so it changes neither the ranking of employees nor any High / Low decision. The Stage 7 threshold of 0.5 on the raw output corresponds to **41%** on the calibrated scale, above the company-wide attrition rate of 37%.
+
+**Key pattern in the data:** attrition rises sharply only when two problems occur together: low job satisfaction **and** low appraisal (both 1-2), or overtime **and** a work-life balance of 1 (about 81-82% left in each case, against about 27-34% otherwise). Changing just one of these factors therefore moves the chance of leaving very little.
 
 ### API endpoints
 

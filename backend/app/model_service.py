@@ -65,28 +65,40 @@ class ModelService:
         return cls(model=model, features=list(features), metadata=metadata)
 
     # ------------------------------------------------------------------ prediction
+    def calibrate(self, raw_score):
+        """Map the model's raw output to a realistic probability (sigmoid calibration, see metadata script).
+
+        The model was trained with class_weight='balanced', which inflates its outputs for leavers.
+        The calibration is monotonic, so it never changes which employee is ranked as riskier.
+        """
+        c = self.metadata["calibration"]
+        return 1 / (1 + np.exp(-(c["slope"] * np.asarray(raw_score) + c["intercept"])))
+
     def predict(self, employee: EmployeeInput) -> dict:
         row = to_feature_row(employee, self.features)
-        threshold = self.metadata["decision_threshold"]
 
+        raw_score = float(self.model.predict_proba(row)[0, 1])
         probability, typical_probability, contributions = self._shapley_contributions(row)
-        will_leave = probability >= threshold
+        # Decision exactly as in Stage 7 (raw output >= 0.5); equivalent to probability >= decision_threshold
+        will_leave = raw_score >= self.metadata["model_threshold"]
         risk_level = "High" if will_leave else "Low"
 
         return {
             "prediction": "Likely to leave" if will_leave else "Likely to stay",
             "will_leave": will_leave,
             "probability_of_leaving": round(probability, 4),
+            "model_score": round(raw_score, 4),
             "typical_employee_probability": round(typical_probability, 4),
             "risk_level": risk_level,
             "risk_explanation": self._risk_explanation(risk_level),
-            "decision_threshold": threshold,
+            "decision_threshold": self.metadata["decision_threshold"],
+            "company_attrition_rate": self.metadata["company_attrition_rate"],
             "key_factors": self._key_factors(row, contributions),
             "warnings": self._range_warnings(row),
         }
 
     def _shapley_contributions(self, row: pd.DataFrame):
-        """Exact Shapley values against a 'typical employee' (training medians).
+        """Exact Shapley values against a 'typical employee' (training medians), on the calibrated probability.
 
         Every combination of the employee's own values and the typical values is scored
         (2^10 = 1,024 rows, one batch). Each feature's contribution is its average effect on the
@@ -100,7 +112,7 @@ class ModelService:
         masks = np.arange(2 ** n)
         uses_employee_value = ((masks[:, None] >> np.arange(n)) & 1).astype(bool)
         combinations = pd.DataFrame(np.where(uses_employee_value, employee, typical), columns=self.features)
-        probabilities = self.model.predict_proba(combinations)[:, 1]
+        probabilities = self.calibrate(self.model.predict_proba(combinations)[:, 1])
 
         subset_size = uses_employee_value.sum(axis=1)
         weights = np.array([factorial(s) * factorial(n - s - 1) / factorial(n) for s in range(n)])
@@ -164,6 +176,8 @@ class ModelService:
                           "training_range": self.metadata["training_ranges"][f],
                           "typical_value": self.metadata["training_medians"][f]} for f in self.features],
             "decision_threshold": self.metadata["decision_threshold"],
+            "model_threshold": self.metadata["model_threshold"],
+            "calibration": self.metadata["calibration"],
             "test_metrics": self.metadata["test_metrics"],
             "risk_groups_on_test_set": self.metadata["risk_groups_on_test_set"],
         }

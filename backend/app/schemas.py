@@ -48,17 +48,20 @@ class KeyFactor(BaseModel):
     value: str
     typical_value: str
     effect: Literal["increases risk", "reduces risk"]
-    impact: float = Field(..., description="Contribution to the probability of leaving, compared with a typical employee (Shapley value)")
+    impact: float = Field(..., description="Contribution to the calibrated probability of leaving, compared with a typical employee (Shapley value)")
     suggested_action: str | None = None
 
 
 class PredictionResponse(BaseModel):
     prediction: Literal["Likely to leave", "Likely to stay"]
     will_leave: bool
-    probability_of_leaving: float
+    probability_of_leaving: float = Field(
+        ..., description="Calibrated probability of leaving (0-1), matched to real attrition rates on past employees")
+    model_score: float = Field(..., description="Raw Random Forest output before calibration (decision: >= 0.5)")
     typical_employee_probability: float
+    company_attrition_rate: float
     risk_level: Literal["High", "Low"]
     risk_explanation: str
-    decision_threshold: float
+    decision_threshold: float = Field(..., description="Calibrated probability at which an employee is flagged High risk")
     key_factors: list[KeyFactor]
     warnings: list[str]
