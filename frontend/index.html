@@ -8,10 +8,71 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Icon set (simple line icons, reused with <use>) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-logo" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-survey" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 14.5c1 1.2 2.1 1.8 3.5 1.8s2.5-.6 3.5-1.8M9 9.5h.01M15 9.5h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 12h18" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20c1.5-3.5 4.4-5 8-5s6.5 1.5 8 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    </defs>
+  </svg>
+
   <header class="site-header">
-    <div class="container">
-      <h1>Employee Attrition Risk Checker</h1>
-      <p class="tagline">Check an employee's risk of leaving, see the main reasons, and get suggested HR actions.</p>
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"><svg><use href="#i-logo"/></svg></span>
+        <div>
+          <h1>Employee Attrition Risk Checker</h1>
+          <p class="tagline">Check an employee's risk of leaving, see the main reasons, and get suggested HR actions.</p>
+          <ul class="header-chips" aria-label="Key features">
+            <li>10 details</li>
+            <li>Instant result</li>
+            <li>Explains the reasons</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Decorative line-art illustration: an HR team reviewing results -->
+      <svg class="header-art" viewBox="0 0 400 150" aria-hidden="true">
+        <g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <!-- floor -->
+          <path class="art-faint" d="M20 132h370"/>
+
+          <!-- person at a desk with a laptop -->
+          <circle cx="44" cy="62" r="11"/>
+          <path d="M28 106v-18a16 16 0 0 1 32 0v18"/>
+          <path d="M50 92l20 8"/>
+          <path d="M14 106h96"/>
+          <path d="M26 106v26M98 106v26"/>
+          <path d="M66 106l6-24h30l-6 24"/>
+
+          <!-- presenter pointing at a chart board -->
+          <rect x="150" y="12" width="104" height="72" rx="7"/>
+          <path class="art-bar" d="M170 70v-10M188 70v-18M206 70v-14M224 70v-26M242 70v-36"/>
+          <path d="M166 46l20-10 18 6 34-22"/>
+          <path d="M228 18l10 2-2 10"/>
+          <path d="M202 84v16M186 100h32"/>
+          <circle cx="128" cy="58" r="10"/>
+          <path d="M128 68v32"/>
+          <path d="M128 76l22-16"/>
+          <path d="M128 78l-12 14"/>
+          <path d="M128 100l-9 32M128 100l9 32"/>
+
+          <!-- two colleagues in conversation -->
+          <rect x="296" y="10" width="44" height="26" rx="8"/>
+          <path d="M308 36l-4 9 12-9"/>
+          <path class="art-dots" d="M309 23h0M318 23h0M327 23h0"/>
+          <circle cx="296" cy="66" r="11"/>
+          <path d="M280 132v-36a16 16 0 0 1 32 0v36"/>
+          <circle cx="352" cy="60" r="12"/>
+          <path d="M334 132v-40a18 18 0 0 1 36 0v40"/>
+        </g>
+      </svg>
     </div>
   </header>
 
@@ -22,15 +83,15 @@
         <h2 id="form-title">Employee details</h2>
         <div class="examples">
           <span>Try an example:</span>
-          <button type="button" class="link-btn" data-example="high">High-risk employee</button>
-          <button type="button" class="link-btn" data-example="low">Low-risk employee</button>
+          <button type="button" class="chip-btn" data-example="high">High-risk employee</button>
+          <button type="button" class="chip-btn" data-example="low">Low-risk employee</button>
         </div>
       </div>
       <p class="hint">All fields are required. Survey scores should come from the most recent regular engagement survey, not an exit interview.</p>
 
       <form id="employee-form" novalidate>
         <fieldset>
-          <legend>Engagement survey</legend>
+          <legend><svg class="legend-icon" aria-hidden="true"><use href="#i-survey"/></svg>Engagement survey</legend>
           <div class="field">
             <label for="job_satisfaction">Job satisfaction</label>
             <select id="job_satisfaction" name="job_satisfaction" required>
@@ -69,12 +130,12 @@
         </fieldset>
 
         <fieldset>
-          <legend>Work pattern</legend>
+          <legend><svg class="legend-icon" aria-hidden="true"><use href="#i-clock"/></svg>Work pattern</legend>
           <div class="field">
             <span class="label" id="overtime-label">Regularly works overtime?</span>
             <div class="radio-group" role="radiogroup" aria-labelledby="overtime-label">
-              <label><input type="radio" name="does_overtime" value="Yes" required> Yes</label>
-              <label><input type="radio" name="does_overtime" value="No"> No</label>
+              <label class="radio-pill"><input type="radio" name="does_overtime" value="Yes" required><span>Yes</span></label>
+              <label class="radio-pill"><input type="radio" name="does_overtime" value="No"><span>No</span></label>
             </div>
             <p class="error" data-for="does_overtime"></p>
           </div>
@@ -91,7 +152,7 @@
         </fieldset>
 
         <fieldset>
-          <legend>Employment history</legend>
+          <legend><svg class="legend-icon" aria-hidden="true"><use href="#i-briefcase"/></svg>Employment history</legend>
           <div class="field">
             <label for="date_of_joining">Date of joining</label>
             <input id="date_of_joining" name="date_of_joining" type="date" min="1970-01-01" required>
@@ -117,7 +178,7 @@
         <p class="error form-error" data-for="general" role="alert"></p>
 
         <div class="actions">
-          <button type="submit" class="btn-primary" id="submit-btn">Check attrition risk</button>
+          <button type="submit" class="btn-primary" id="submit-btn"><span class="btn-label">Check attrition risk</span></button>
           <button type="reset" class="btn-secondary">Clear</button>
         </div>
       </form>
@@ -128,42 +189,49 @@
       <h2 id="result-title">Result</h2>
 
       <div id="result-empty" class="empty-state">
-        <p>Fill in the employee details and select <strong>Check attrition risk</strong>.</p>
-        <p class="muted">The result shows the chance of leaving, the main reasons behind it and suggested actions for HR.</p>
+        <span class="empty-icon" aria-hidden="true"><svg><use href="#i-person"/></svg></span>
+        <p class="empty-title">No employee checked yet</p>
+        <p class="muted">Fill in the details, or try one of the examples, then select <strong>Check attrition risk</strong>.</p>
+        <ol class="steps">
+          <li><span>1</span>Enter details</li>
+          <li><span>2</span>Check risk</li>
+          <li><span>3</span>See reasons &amp; actions</li>
+        </ol>
       </div>
 
       <div id="result-error" class="alert alert-error" hidden></div>
 
       <div id="result" hidden>
-        <div class="risk-banner" id="risk-banner">
-          <span class="risk-badge" id="risk-badge"></span>
-          <div>
+        <div class="result-top reveal" style="--i:0" id="risk-banner">
+          <div class="gauge">
+            <svg viewBox="0 0 160 160" aria-hidden="true">
+              <circle class="gauge-track" cx="80" cy="80" r="66"/>
+              <circle class="gauge-value" id="gauge-value" cx="80" cy="80" r="66" transform="rotate(-90 80 80)"/>
+              <line class="gauge-threshold" id="gauge-threshold" x1="80" y1="2" x2="80" y2="26"/>
+            </svg>
+            <div class="gauge-center">
+              <span class="gauge-number" id="probability-text">0%</span>
+              <span class="gauge-caption">chance of leaving</span>
+            </div>
+          </div>
+          <div class="result-summary">
+            <span class="risk-badge" id="risk-badge"></span>
             <p class="prediction" id="prediction-text"></p>
-            <p class="probability"><span id="probability-text"></span> chance of leaving</p>
+            <p class="risk-explanation" id="risk-explanation"></p>
           </div>
         </div>
+        <p class="muted small context-note reveal" style="--i:1" id="context-note"></p>
 
-        <div class="meter" aria-hidden="true">
-          <div class="meter-fill" id="meter-fill"></div>
-          <div class="meter-threshold" id="meter-threshold"></div>
+        <div id="warnings" class="alert alert-warning reveal" style="--i:1" hidden></div>
+
+        <div class="reveal" style="--i:2">
+          <h3>What is driving this result</h3>
+          <p class="muted small" id="factors-intro"></p>
         </div>
-        <div class="meter-scale" aria-hidden="true">
-          <span>0%</span>
-          <span class="meter-threshold-label" id="meter-threshold-label"></span>
-          <span>100%</span>
-        </div>
-
-        <p class="risk-explanation" id="risk-explanation"></p>
-        <p class="muted small context-note" id="context-note"></p>
-
-        <div id="warnings" class="alert alert-warning" hidden></div>
-
-        <h3>What is driving this result</h3>
-        <p class="muted small" id="factors-intro"></p>
         <ul class="factors" id="factors"></ul>
 
         <div id="actions-block">
-          <h3>Suggested HR actions</h3>
+          <h3 class="reveal" id="actions-title">Suggested HR actions</h3>
           <ul class="actions-list" id="actions-list"></ul>
         </div>
 

@@ -92,27 +92,56 @@ function readForm() {
 }
 
 // ------------------------------------------------------------------ render the result
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const GAUGE_CIRCUMFERENCE = 2 * Math.PI * 66;   // radius of the gauge circle in index.html
+
+// Count the percentage up from 0 so the number and the ring fill together
+function animateNumber(el, target, duration = 1100) {
+  const end = Math.round(target * 100);
+  if (reduceMotion) { el.textContent = `${end}%`; return; }
+  const start = performance.now();
+  const step = (now) => {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = `${Math.round(end * eased)}%`;
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function drawGauge(probability, threshold) {
+  const ring = $("gauge-value");
+  ring.style.strokeDasharray = GAUGE_CIRCUMFERENCE;
+  // Start empty, then let the CSS transition fill the ring to the result
+  ring.style.transition = "none";
+  ring.style.strokeDashoffset = GAUGE_CIRCUMFERENCE;
+  ring.getBoundingClientRect();
+  ring.style.transition = "";
+  ring.style.strokeDashoffset = GAUGE_CIRCUMFERENCE * (1 - probability);
+  // Tick mark on the ring at the high-risk threshold
+  $("gauge-threshold").setAttribute("transform", `rotate(${threshold * 360} 80 80)`);
+}
+
 function renderResult(r) {
   $("result-empty").hidden = true;
-  $("result").hidden = false;
+  const result = $("result");
+  result.hidden = false;
+  // Restart the staggered reveal animation for every new result
+  result.classList.remove("animate");
+  void result.offsetWidth;
+  result.classList.add("animate");
 
   const level = r.risk_level.toLowerCase();
-  $("risk-banner").className = `risk-banner ${level}`;
+  $("risk-banner").className = `result-top reveal ${level}`;
   $("risk-badge").textContent = `${r.risk_level} risk`;
   $("prediction-text").textContent = r.prediction;
-  $("probability-text").textContent = percent(r.probability_of_leaving);
   $("risk-explanation").textContent = r.risk_explanation;
   $("context-note").textContent =
     `For comparison, ${percent(r.company_attrition_rate)} of all employees in the data left the company. ` +
-    `Employees are flagged high risk from ${percent(r.decision_threshold)}.`;
+    `Employees are flagged high risk from ${percent(r.decision_threshold)} (the black mark on the ring).`;
 
-  const fill = $("meter-fill");
-  fill.className = `meter-fill ${level}`;
-  fill.style.width = percent(r.probability_of_leaving);
-  $("meter-threshold").style.left = `${r.decision_threshold * 100}%`;
-  const thresholdLabel = $("meter-threshold-label");
-  thresholdLabel.style.left = `${r.decision_threshold * 100}%`;
-  thresholdLabel.textContent = `${percent(r.decision_threshold)} high-risk threshold`;
+  drawGauge(r.probability_of_leaving, r.decision_threshold);
+  animateNumber($("probability-text"), r.probability_of_leaving);
 
   const warnings = $("warnings");
   warnings.hidden = r.warnings.length === 0;
@@ -126,12 +155,14 @@ function renderResult(r) {
     `(only details worth 2 pts or more are listed).`;
 
   const factors = $("factors");
+  // Reveal order: summary (0), note (1), heading (2), each factor (3, 4, ...), then the actions
+  let order = 3;
   factors.innerHTML = r.key_factors.length
     ? r.key_factors.map((f) => {
         const up = f.effect === "increases risk";
         const points = Math.round(Math.abs(f.impact) * 100);
-        return `<li>
-          <span class="factor-icon ${up ? "up" : "down"}" aria-hidden="true">${up ? "&uarr;" : "&darr;"}</span>
+        return `<li class="reveal" style="--i:${order++}">
+          <span class="factor-icon ${up ? "up" : "down"}" aria-hidden="true"><svg><use href="#i-${up ? "up" : "down"}"/></svg></span>
           <div>
             <div class="factor-name">${escapeHtml(f.label)}: ${escapeHtml(f.value)}</div>
             <div class="factor-detail">${up ? "Increases" : "Reduces"} risk (typical employee: ${escapeHtml(f.typical_value)})</div>
@@ -139,11 +170,23 @@ function renderResult(r) {
           <span class="factor-impact ${up ? "up" : "down"}">${up ? "+" : "&minus;"}${points} pts</span>
         </li>`;
       }).join("")
-    : `<li class="no-factors">No single detail stands out: this employee's chance of leaving is close to that of a typical employee.</li>`;
+    : `<li class="no-factors reveal" style="--i:${order++}">No single detail stands out: this employee's chance of leaving is close to that of a typical employee.</li>`;
 
   const actions = [...new Set(r.key_factors.map((f) => f.suggested_action).filter(Boolean))];
   $("actions-block").hidden = actions.length === 0;
-  $("actions-list").innerHTML = actions.map((a) => `<li>${escapeHtml(a)}</li>`).join("");
+  $("actions-title").style.setProperty("--i", order++);
+  $("actions-list").innerHTML = actions
+    .map((a) => `<li class="reveal" style="--i:${order++}">
+        <span class="action-icon" aria-hidden="true"><svg><use href="#i-check"/></svg></span>
+        <span>${escapeHtml(a)}</span>
+      </li>`)
+    .join("");
+}
+
+function setLoading(isLoading) {
+  submitBtn.disabled = isLoading;
+  submitBtn.classList.toggle("loading", isLoading);
+  submitBtn.querySelector(".btn-label").textContent = isLoading ? "Analysing..." : "Check attrition risk";
 }
 
 function showError(message) {
@@ -164,8 +207,7 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Checking...";
+  setLoading(true);
   try {
     const response = await fetch(`${API_BASE}/api/predict`, {
       method: "POST",
@@ -184,8 +226,7 @@ form.addEventListener("submit", async (event) => {
   } catch (err) {
     showError(`Could not get a prediction. Make sure the backend server is running. (${err.message})`);
   } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Check attrition risk";
+    setLoading(false);
   }
 });
 
