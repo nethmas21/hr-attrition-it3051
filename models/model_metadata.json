@@ -1,0 +1,96 @@
+{
+  "model_name": "Random Forest (tuned, top 10 features)",
+  "model_settings": {
+    "class_weight": "balanced",
+    "max_depth": 5,
+    "max_features": null,
+    "min_samples_leaf": 8,
+    "min_samples_split": 2,
+    "n_estimators": 200
+  },
+  "features": [
+    "AppraisalRating",
+    "JobSatisfaction",
+    "DoesOvertime",
+    "WorkLifeBalance",
+    "PreviousCompanies",
+    "JoiningYear",
+    "MonthlySalary",
+    "YearsWithCompany",
+    "DistanceFromHome",
+    "LeavesTaken"
+  ],
+  "decision_threshold": 0.5,
+  "training_ranges": {
+    "AppraisalRating": {
+      "min": 1.0,
+      "max": 5.0
+    },
+    "JobSatisfaction": {
+      "min": 1.0,
+      "max": 5.0
+    },
+    "DoesOvertime": {
+      "min": 0.0,
+      "max": 1.0
+    },
+    "WorkLifeBalance": {
+      "min": 1.0,
+      "max": 4.0
+    },
+    "PreviousCompanies": {
+      "min": 0.0,
+      "max": 5.0
+    },
+    "JoiningYear": {
+      "min": 2015.0,
+      "max": 2024.0
+    },
+    "MonthlySalary": {
+      "min": 15031.0,
+      "max": 119878.0
+    },
+    "YearsWithCompany": {
+      "min": 1.0,
+      "max": 10.0
+    },
+    "DistanceFromHome": {
+      "min": 1.0,
+      "max": 50.0
+    },
+    "LeavesTaken": {
+      "min": 0.0,
+      "max": 30.0
+    }
+  },
+  "training_medians": {
+    "AppraisalRating": 3.0,
+    "JobSatisfaction": 3.0,
+    "DoesOvertime": 0.0,
+    "WorkLifeBalance": 3.0,
+    "PreviousCompanies": 3.0,
+    "JoiningYear": 2019.0,
+    "MonthlySalary": 68148.0,
+    "YearsWithCompany": 6.0,
+    "DistanceFromHome": 25.25,
+    "LeavesTaken": 15.0
+  },
+  "test_metrics": {
+    "accuracy": 0.787,
+    "precision": 0.7904,
+    "recall": 0.5795,
+    "f1": 0.6687,
+    "roc_auc": 0.7433,
+    "test_size": 1000
+  },
+  "risk_groups_on_test_set": {
+    "High": {
+      "employees": 272,
+      "actually_left_rate": 0.7904
+    },
+    "Low": {
+      "employees": 728,
+      "actually_left_rate": 0.2143
+    }
+  }
+}

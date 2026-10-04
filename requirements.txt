@@ -1,3 +1,4 @@
+# Data analysis and modelling
 pandas==3.0.5
 numpy==2.5.1
 matplotlib==3.11.1
@@ -5,3 +6,9 @@ seaborn==0.13.2
 scikit-learn==1.9.0
 joblib==1.5.3
 ipykernel
+
+# Prediction system (backend API + tests)
+fastapi==0.141.1
+uvicorn==0.53.0
+pytest==9.1.1
+httpx==0.28.1

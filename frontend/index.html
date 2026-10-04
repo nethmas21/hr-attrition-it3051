@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Employee Attrition Risk Checker</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231f3a5f'/%3E%3Cpath d='M4 11l3-3 2 2 3-4' stroke='white' stroke-width='1.6' fill='none'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>Employee Attrition Risk Checker</h1>
+      <p class="tagline">Estimate how likely an employee is to leave, see the main reasons, and get suggested HR actions.</p>
+    </div>
+  </header>
+
+  <main class="container layout">
+    <!-- ============================== INPUT FORM ============================== -->
+    <section class="card form-card" aria-labelledby="form-title">
+      <div class="card-head">
+        <h2 id="form-title">Employee details</h2>
+        <div class="examples">
+          <span>Try an example:</span>
+          <button type="button" class="link-btn" data-example="high">High-risk employee</button>
+          <button type="button" class="link-btn" data-example="low">Low-risk employee</button>
+        </div>
+      </div>
+      <p class="hint">All fields are required. Survey scores should come from the most recent regular engagement survey, not an exit interview.</p>
+
+      <form id="employee-form" novalidate>
+        <fieldset>
+          <legend>Engagement survey</legend>
+          <div class="field">
+            <label for="job_satisfaction">Job satisfaction</label>
+            <select id="job_satisfaction" name="job_satisfaction" required>
+              <option value="">Select a score</option>
+              <option value="1">1 - Very low</option>
+              <option value="2">2 - Low</option>
+              <option value="3">3 - Neutral</option>
+              <option value="4">4 - High</option>
+              <option value="5">5 - Very high</option>
+            </select>
+            <p class="error" data-for="job_satisfaction"></p>
+          </div>
+          <div class="field">
+            <label for="work_life_balance">Work-life balance</label>
+            <select id="work_life_balance" name="work_life_balance" required>
+              <option value="">Select a score</option>
+              <option value="1">1 - Poor</option>
+              <option value="2">2 - Fair</option>
+              <option value="3">3 - Good</option>
+              <option value="4">4 - Excellent</option>
+            </select>
+            <p class="error" data-for="work_life_balance"></p>
+          </div>
+          <div class="field">
+            <label for="appraisal_rating">Latest appraisal rating</label>
+            <select id="appraisal_rating" name="appraisal_rating" required>
+              <option value="">Select a rating</option>
+              <option value="1">1 - Needs improvement</option>
+              <option value="2">2 - Below expectations</option>
+              <option value="3">3 - Meets expectations</option>
+              <option value="4">4 - Exceeds expectations</option>
+              <option value="5">5 - Outstanding</option>
+            </select>
+            <p class="error" data-for="appraisal_rating"></p>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Work pattern</legend>
+          <div class="field">
+            <span class="label" id="overtime-label">Regularly works overtime?</span>
+            <div class="radio-group" role="radiogroup" aria-labelledby="overtime-label">
+              <label><input type="radio" name="does_overtime" value="Yes" required> Yes</label>
+              <label><input type="radio" name="does_overtime" value="No"> No</label>
+            </div>
+            <p class="error" data-for="does_overtime"></p>
+          </div>
+          <div class="field">
+            <label for="leaves_taken">Leave days taken in the last year</label>
+            <input id="leaves_taken" name="leaves_taken" type="number" inputmode="numeric" min="0" max="365" step="1" placeholder="e.g. 12" required>
+            <p class="error" data-for="leaves_taken"></p>
+          </div>
+          <div class="field">
+            <label for="distance_from_home">Distance from home to office (km)</label>
+            <input id="distance_from_home" name="distance_from_home" type="number" inputmode="decimal" min="0" max="500" step="0.1" placeholder="e.g. 18.5" required>
+            <p class="error" data-for="distance_from_home"></p>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Employment history</legend>
+          <div class="field">
+            <label for="date_of_joining">Date of joining</label>
+            <input id="date_of_joining" name="date_of_joining" type="date" min="1970-01-01" required>
+            <p class="error" data-for="date_of_joining"></p>
+          </div>
+          <div class="field">
+            <label for="years_with_company">Completed years with the company</label>
+            <input id="years_with_company" name="years_with_company" type="number" inputmode="numeric" min="0" max="50" step="1" placeholder="e.g. 4" required>
+            <p class="error" data-for="years_with_company"></p>
+          </div>
+          <div class="field">
+            <label for="previous_companies">Number of previous companies</label>
+            <input id="previous_companies" name="previous_companies" type="number" inputmode="numeric" min="0" max="30" step="1" placeholder="e.g. 2" required>
+            <p class="error" data-for="previous_companies"></p>
+          </div>
+          <div class="field">
+            <label for="monthly_salary">Monthly salary (INR)</label>
+            <input id="monthly_salary" name="monthly_salary" type="number" inputmode="numeric" min="1" max="1000000" step="1" placeholder="e.g. 65000" required>
+            <p class="error" data-for="monthly_salary"></p>
+          </div>
+        </fieldset>
+
+        <p class="error form-error" data-for="general" role="alert"></p>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary" id="submit-btn">Check attrition risk</button>
+          <button type="reset" class="btn-secondary">Clear</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============================== RESULT ============================== -->
+    <section class="card result-card" aria-labelledby="result-title" aria-live="polite">
+      <h2 id="result-title">Result</h2>
+
+      <div id="result-empty" class="empty-state">
+        <p>Fill in the employee details and select <strong>Check attrition risk</strong>.</p>
+        <p class="muted">The result shows the chance of leaving, the main reasons behind it and suggested actions for HR.</p>
+      </div>
+
+      <div id="result-error" class="alert alert-error" hidden></div>
+
+      <div id="result" hidden>
+        <div class="risk-banner" id="risk-banner">
+          <span class="risk-badge" id="risk-badge"></span>
+          <div>
+            <p class="prediction" id="prediction-text"></p>
+            <p class="probability"><span id="probability-text"></span> chance of leaving</p>
+          </div>
+        </div>
+
+        <div class="meter" aria-hidden="true">
+          <div class="meter-fill" id="meter-fill"></div>
+          <div class="meter-threshold" title="Decision threshold (50%)"></div>
+        </div>
+        <div class="meter-scale" aria-hidden="true"><span>0%</span><span>50% threshold</span><span>100%</span></div>
+
+        <p class="risk-explanation" id="risk-explanation"></p>
+
+        <div id="warnings" class="alert alert-warning" hidden></div>
+
+        <h3>What is driving this result</h3>
+        <p class="muted small" id="factors-intro"></p>
+        <ul class="factors" id="factors"></ul>
+
+        <div id="actions-block">
+          <h3>Suggested HR actions</h3>
+          <ul class="actions-list" id="actions-list"></ul>
+        </div>
+
+        <p class="disclaimer">This tool supports, but does not replace, HR judgement. Use it to start a supportive conversation with the employee, never as the only basis for decisions about their employment.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container" id="model-info">Loading model information...</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
